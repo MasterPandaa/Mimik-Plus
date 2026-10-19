@@ -2,6 +2,17 @@
 
 All notable changes to Mimik will be documented in this file.
 
+## [1.3.1] - 2026-10-19
+
+### Fixed
+- **Mid-Recording Step Deletion Reliability**:
+  - Eliminated the 800ms polling race condition that caused deleted steps to temporarily flicker back into view before database operations completed by introducing persistent client-side tracking (`deletedStepIdsRef`).
+  - Added concurrent deletion support so multiple steps can be removed in sequence without blocking clicks or freezing the interface.
+  - Wrapped delete button inside Radix UI Tooltip with a layout span and stop-propagation to ensure flawless click registration.
+  - Guarded against jsdom/embedded scroll crashes with safe optional chaining on `scrollIntoView`.
+  - Added automatic snapshot creation before single step deletion in dashboard view for full undo/redo history support.
+  - Broadcasted `notifyGuidesChanged({ type: 'mutated' })` upon step deletion across all open tabs and sidepanels.
+
 ## [1.3.0] - 2026-10-19
 
 ### Added

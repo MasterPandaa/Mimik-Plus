@@ -5,6 +5,7 @@ import { i18n } from '#imports';
 import { startInsertRecording } from '@/core/capture/start-insert-recording';
 import { actionSteps } from '@/core/guides/blocks';
 import {
+  createSnapshot,
   deleteStep,
   getGuide,
   getScreenshotsForSteps,
@@ -74,6 +75,7 @@ export default function GuideContent({ guideId, initialStepId, initialTool }: Gu
     historyOpen,
     setHistoryOpen,
     historyRefreshKey,
+    bumpHistoryRefresh,
   } = useFullview((s) => ({
     setGuideTitle: s.setGuideTitle,
     setGuideStepCount: s.setGuideStepCount,
@@ -84,6 +86,7 @@ export default function GuideContent({ guideId, initialStepId, initialTool }: Gu
     historyOpen: s.historyOpen,
     setHistoryOpen: s.setHistoryOpen,
     historyRefreshKey: s.historyRefreshKey,
+    bumpHistoryRefresh: s.bumpHistoryRefresh,
   }));
 
   const [data, setData] = useState<GuideData | null>(null);
@@ -265,10 +268,15 @@ export default function GuideContent({ guideId, initialStepId, initialTool }: Gu
 
   const handleDeleteStep = useCallback(
     async (stepId: string) => {
+      try {
+        if (await createSnapshot(guideId)) bumpHistoryRefresh();
+      } catch (err) {
+        logger.error('Snapshot before delete failed', err);
+      }
       await deleteStep(guideId, stepId);
       await loadGuide();
     },
-    [guideId, loadGuide],
+    [guideId, loadGuide, bumpHistoryRefresh],
   );
 
   const handleOpenEditor = useCallback(

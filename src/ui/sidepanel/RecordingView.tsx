@@ -40,24 +40,27 @@ export default function RecordingView({ guideId, onStop, voice, aiFailure }: Rec
   const [siteUrl, setSiteUrl] = useState('');
   const [isBlurring, setIsBlurring] = useState(false);
   const [voiceEnabled, setVoiceEnabled] = useState(false);
-  const [deletingStepId, setDeletingStepId] = useState<string | null>(null);
+  const [deletingStepIds, setDeletingStepIds] = useState<Set<string>>(() => new Set());
+  const deletedStepIdsRef = useRef<Set<string>>(new Set());
   const [, setTick] = useState(0);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const prevStepsLengthRef = useRef(0);
 
   const loadSteps = useCallback(async () => {
     const allSteps = await getStepsForGuide(guideId);
-    const screenshotIds = allSteps.map((s) => s.screenshotId).filter(Boolean) as string[];
+    const visibleSteps = allSteps.filter((s) => !deletedStepIdsRef.current.has(s.id));
+    const screenshotIds = visibleSteps.map((s) => s.screenshotId).filter(Boolean) as string[];
     const screenshotMap = await getScreenshotsForSteps(screenshotIds);
 
     setSteps(
-      allSteps.map((step) => ({
+      visibleSteps.map((step) => ({
         step,
         screenshot: screenshotMap.get(step.id),
       })),
     );
 
-    if (allSteps.length > 0 && !siteUrl) {
-      setSiteUrl(allSteps[0].url || '');
+    if (visibleSteps.length > 0 && !siteUrl) {
+      setSiteUrl(visibleSteps[0].url || '');
     }
   }, [guideId, siteUrl]);
 
@@ -73,11 +76,14 @@ export default function RecordingView({ guideId, onStop, voice, aiFailure }: Rec
   }, []);
 
   useEffect(() => {
-    if (steps.length === 0) return;
-    const scroll = () => bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-    scroll();
-    const t = setTimeout(scroll, 300);
-    return () => clearTimeout(t);
+    if (steps.length > prevStepsLengthRef.current) {
+      const scroll = () => bottomRef.current?.scrollIntoView?.({ behavior: 'smooth' });
+      scroll();
+      const t = setTimeout(scroll, 300);
+      prevStepsLengthRef.current = steps.length;
+      return () => clearTimeout(t);
+    }
+    prevStepsLengthRef.current = steps.length;
   }, [steps.length]);
 
   useEffect(() => {
@@ -114,8 +120,9 @@ export default function RecordingView({ guideId, onStop, voice, aiFailure }: Rec
 
   const handleDeleteStep = useCallback(
     async (stepId: string) => {
-      if (deletingStepId) return;
-      setDeletingStepId(stepId);
+      if (deletedStepIdsRef.current.has(stepId)) return;
+      deletedStepIdsRef.current.add(stepId);
+      setDeletingStepIds((prev) => new Set(prev).add(stepId));
       // Optimistic update
       setSteps((prev) => prev.filter((s) => s.step.id !== stepId));
       try {
@@ -123,12 +130,17 @@ export default function RecordingView({ guideId, onStop, voice, aiFailure }: Rec
         await loadSteps();
       } catch (err) {
         logger.error('Failed to delete step during recording', err);
+        deletedStepIdsRef.current.delete(stepId);
         await loadSteps();
       } finally {
-        setDeletingStepId(null);
+        setDeletingStepIds((prev) => {
+          const next = new Set(prev);
+          next.delete(stepId);
+          return next;
+        });
       }
     },
-    [deletingStepId, guideId, loadSteps],
+    [guideId, loadSteps],
   );
 
   const _domain = extractDomain(siteUrl);
@@ -219,19 +231,25 @@ export default function RecordingView({ guideId, onStop, voice, aiFailure }: Rec
                     </div>
                     <Tooltip>
                       <TooltipTrigger asChild>
-                        <button
-                          type="button"
-                          disabled={deletingStepId === liveStep.step.id}
-                          onClick={() => handleDeleteStep(liveStep.step.id)}
-                          aria-label={i18n.t('recording.deleteStep')}
-                          className="shrink-0 p-1.5 rounded-md text-muted-foreground/60 hover:text-destructive hover:bg-destructive/10 focus-visible:opacity-100 transition-colors disabled:opacity-50"
-                        >
-                          {deletingStepId === liveStep.step.id ? (
-                            <Loader2 size={14} className="animate-spin text-destructive" />
-                          ) : (
-                            <Trash2 size={14} />
-                          )}
-                        </button>
+                        <span className="shrink-0">
+                          <button
+                            type="button"
+                            disabled={deletingStepIds.has(liveStep.step.id)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              e.preventDefault();
+                              handleDeleteStep(liveStep.step.id);
+                            }}
+                            aria-label={i18n.t('recording.deleteStep')}
+                            className="p-1.5 rounded-md text-muted-foreground/60 hover:text-destructive hover:bg-destructive/10 focus-visible:opacity-100 transition-colors disabled:opacity-50 cursor-pointer"
+                          >
+                            {deletingStepIds.has(liveStep.step.id) ? (
+                              <Loader2 size={14} className="animate-spin text-destructive" />
+                            ) : (
+                              <Trash2 size={14} />
+                            )}
+                          </button>
+                        </span>
                       </TooltipTrigger>
                       <TooltipContent align="end">{i18n.t('recording.deleteStep')}</TooltipContent>
                     </Tooltip>

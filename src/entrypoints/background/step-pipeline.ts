@@ -63,6 +63,8 @@ async function hasAiAuth(): Promise<boolean> {
 
 async function tryAIDescription(stepId: string, domContext: DOMContext) {
   if (!(await hasAiAuth())) return;
+  const existing = await db.steps.get(stepId);
+  if (!existing) return;
   try {
     await clearStepAiPending(stepId, await generateAiDescription(domContext));
   } catch (err) {

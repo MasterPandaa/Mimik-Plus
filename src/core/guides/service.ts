@@ -259,6 +259,10 @@ export async function deleteSteps(guideId: string, stepIds: readonly string[]): 
       const steps = await db.steps.bulkGet([...doomed]);
       const screenshotIds = steps.map((step) => step?.screenshotId).filter((id): id is string => !!id);
       if (screenshotIds.length > 0) await db.screenshots.bulkDelete(screenshotIds);
+      await db.screenshots
+        .where('stepId')
+        .anyOf([...doomed])
+        .delete();
     }
     await db.steps.bulkDelete([...doomed]);
     const remaining = await db.steps.where('guideId').equals(guideId).sortBy('index');
@@ -266,11 +270,12 @@ export async function deleteSteps(guideId: string, stepIds: readonly string[]): 
     const guide = await db.guides.get(guideId);
     if (guide) {
       await db.guides.update(guideId, {
-        stepIds: guide.stepIds.filter((id) => !doomed.has(id)),
+        stepIds: (guide.stepIds ?? []).filter((id) => !doomed.has(id)),
         updatedAt: Date.now(),
       });
     }
   });
+  notifyGuidesChanged({ type: 'mutated' });
 }
 
 export async function deleteStep(guideId: string, stepId: string): Promise<void> {
