@@ -2,7 +2,22 @@
 
 All notable changes to Mimik will be documented in this file.
 
-## [Unreleased]
+## [1.3.0] - 2026-10-19
+
+### Added
+- **Live Step Deletion**: Delete steps directly in the side panel during active recording without having to finish or stop the recording session. Includes automatic re-indexing, clean step numbering badges, and responsive optimistic UI.
+- **Dynamic Model Selection**: Model dropdown now dynamically queries and displays available models from the provider's `/models` endpoint only after the API key is verified.
+- **Reordered Settings Fields**: AI Settings layout updated to an intuitive flow: Provider → API Key → Dynamic Model Selection → Language.
+- **Indonesian AI Captions Optimization**: Added few-shot natural Indonesian prompt guidelines and imperative tone enforcement to ensure high quality descriptions even with low-cost/free AI models.
+- **Opera MV3 Support**: Added verified build scripts (`npm run build:opera`) and automated zip distribution packaging (`npm run zip:opera`).
+
+### Fixed
+- **Shadow DOM Piercing Selectors**: Resolved `CssSelectorGenerator: shadow root inferred` errors on complex enterprise web portals (such as Mazda systems) by introducing multi-level `host >>> inner` selector chaining.
+- **InputSession Mid-Record Race Conditions**: Guarded `handleUpdateInputStep` and `handleFinalizeInputStep` in background service worker to prevent orphaned screenshots or lingering AI jobs if a step is removed while typing is active.
+- **Client Input State Auto-Reset**: Content script `InputSession` automatically resets when a step deletion is acknowledged by the background, allowing seamless typing continuation.
+- **Locale Test Coverage**: Added missing `settings.modelConnectFirst` translation to Chinese (`zh-CN.yml`) maintaining 100% test coverage across all supported locales.
+
+## [1.2.0] - 2026-10-06
 
 ### Added
 - **Google Gemini Provider**: Added support for Google Gemini as a built-in AI provider using Google's official OpenAI-compatible REST endpoint (`https://generativelanguage.googleapis.com/v1beta/openai`).

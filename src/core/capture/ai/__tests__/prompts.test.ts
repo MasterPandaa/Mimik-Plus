@@ -1,5 +1,34 @@
 import { describe, expect, it } from 'vitest';
-import { AI_LANGUAGES, GUIDE_META_PROMPT, getLanguageSuffix } from '../prompts';
+import {
+  AI_LANGUAGES,
+  GUIDE_META_PROMPT,
+  getLanguageSuffix,
+  getMetaLanguageSuffix,
+  STEP_DESCRIPTION_PROMPT,
+} from '../prompts';
+
+describe('STEP_DESCRIPTION_PROMPT', () => {
+  it('has a context placeholder', () => {
+    expect(STEP_DESCRIPTION_PROMPT).toContain('{{context}}');
+  });
+
+  it('includes structured role and task instructions', () => {
+    expect(STEP_DESCRIPTION_PROMPT).toContain('ROLE:');
+    expect(STEP_DESCRIPTION_PROMPT).toContain('TASK:');
+  });
+
+  it('enforces format rules including imperative mood and single sentence', () => {
+    expect(STEP_DESCRIPTION_PROMPT).toContain('FORMAT RULES:');
+    expect(STEP_DESCRIPTION_PROMPT.toLowerCase()).toContain('imperative');
+    expect(STEP_DESCRIPTION_PROMPT).toMatch(/one/i);
+    expect(STEP_DESCRIPTION_PROMPT.toLowerCase()).toContain('sentence');
+  });
+
+  it('prohibits preamble and numbering', () => {
+    expect(STEP_DESCRIPTION_PROMPT).toContain('No numbering');
+    expect(STEP_DESCRIPTION_PROMPT).toContain('no preamble');
+  });
+});
 
 describe('GUIDE_META_PROMPT', () => {
   it('has a steps placeholder', () => {
@@ -49,10 +78,61 @@ describe('getLanguageSuffix', () => {
     expect(getLanguageSuffix('sv')).toContain('sv');
   });
 
-  it('includes IMPORTANT instruction', () => {
+  it('includes IMPORTANT instruction and natural phrasing guidance', () => {
     const suffix = getLanguageSuffix('es');
     expect(suffix).toContain('IMPORTANT');
     expect(suffix).toContain('Write the output in');
+    expect(suffix).toContain('natural');
+  });
+
+  it('includes few-shot examples for Indonesian including required actions', () => {
+    const suffix = getLanguageSuffix('id');
+    expect(suffix).toContain('Klik tombol Kirim');
+    expect(suffix).toContain('Masukkan alamat email di kolom Email');
+    expect(suffix).toContain("Pilih 'Admin' dari dropdown Peran");
+    expect(suffix).toContain('Buka halaman Pengaturan');
+  });
+
+  it('enforces Indonesian imperative mood (kalimat perintah)', () => {
+    const suffix = getLanguageSuffix('id');
+    expect(suffix).toContain('kalimat perintah');
+    expect(suffix).toContain('Meng-');
+  });
+
+  it('includes few-shot examples for Spanish', () => {
+    const suffix = getLanguageSuffix('es');
+    expect(suffix).toContain('Haz clic');
+  });
+
+  it('does not include examples for unknown languages', () => {
+    const suffix = getLanguageSuffix('sv');
+    expect(suffix).not.toContain('Examples in');
+  });
+
+  it('supports context="meta" parameter delegation', () => {
+    const stepSuffix = getLanguageSuffix('id', 'step');
+    const metaSuffix = getLanguageSuffix('id', 'meta');
+    expect(stepSuffix).toContain('Klik tombol Kirim');
+    expect(metaSuffix).toContain('Title examples in Indonesian');
+    expect(metaSuffix).toContain('Description examples in Indonesian');
+  });
+});
+
+describe('getMetaLanguageSuffix', () => {
+  it('returns empty string for English', () => {
+    expect(getMetaLanguageSuffix('en')).toBe('');
+  });
+
+  it('includes language name, title, and description examples for Indonesian', () => {
+    const suffix = getMetaLanguageSuffix('id');
+    expect(suffix).toContain('Indonesian');
+    expect(suffix).toContain('Title examples in Indonesian');
+    expect(suffix).toContain('Description examples in Indonesian');
+  });
+
+  it('includes language name for Spanish', () => {
+    const suffix = getMetaLanguageSuffix('es');
+    expect(suffix).toContain('Spanish');
   });
 });
 

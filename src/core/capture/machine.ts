@@ -11,7 +11,8 @@ type CaptureEvent =
   | { type: 'START_RECORDING'; url?: string; insertTargetGuideId?: string; insertAtIndex?: number }
   | { type: 'STOP_RECORDING' }
   | { type: 'USER_ACTION' }
-  | { type: 'URL_CHANGED'; url: string };
+  | { type: 'URL_CHANGED'; url: string }
+  | { type: 'STEP_DELETED'; count?: number };
 
 interface CaptureContext {
   currentGuideId: string | null;
@@ -70,6 +71,12 @@ export const captureMachine = createMachine({
         URL_CHANGED: {
           actions: assign({
             currentUrl: ({ event }) => event.url,
+          }),
+        },
+        STEP_DELETED: {
+          actions: assign({
+            stepCount: ({ context, event }) =>
+              typeof event.count === 'number' ? Math.max(0, event.count) : Math.max(0, context.stepCount - 1),
           }),
         },
       },

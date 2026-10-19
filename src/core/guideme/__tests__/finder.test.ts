@@ -577,4 +577,24 @@ describe('findElement', () => {
     expect(result.element).toBe(btn);
     expect(result.matchDetails.cssSelector).toBe(1);
   });
+
+  it('resolves deep cssSelector across Shadow DOM boundaries', () => {
+    const host = document.createElement('div');
+    host.id = 'shadow-host';
+    document.body.appendChild(host);
+    const shadow = host.attachShadow({ mode: 'open' });
+    const innerBtn = makeVisible(document.createElement('button'));
+    innerBtn.className = 'inner-action';
+    innerBtn.textContent = 'Action';
+    shadow.appendChild(innerBtn);
+
+    const meta = makeMeta({
+      tag: 'button',
+      cssSelector: '#shadow-host >>> .inner-action',
+      textContent: 'Action',
+    });
+
+    const { matchDetails } = scoreCandidate(meta, innerBtn);
+    expect(matchDetails.cssSelector).toBe(1);
+  });
 });

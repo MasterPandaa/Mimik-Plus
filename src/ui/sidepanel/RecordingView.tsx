@@ -1,9 +1,10 @@
-import { Check, EyeOff, Loader2, X } from 'lucide-react';
+import { Check, EyeOff, Loader2, Trash2, X } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { browser, i18n } from '#imports';
-import { deleteStep, getScreenshotsForSteps, getStepsForGuide } from '@/core/guides/service';
+import { getScreenshotsForSteps, getStepsForGuide } from '@/core/guides/service';
 import type { Screenshot, Step } from '@/core/guides/types';
 import { getActiveTab, localStorage } from '@/lib/browser-api';
+import { logger } from '@/lib/logger';
 import { sendMessage } from '@/lib/messaging';
 import type { PanelAiUpdate, PanelVoiceUpdate } from '@/lib/port';
 import { extractDomain } from '@/lib/utils';
@@ -39,6 +40,7 @@ export default function RecordingView({ guideId, onStop, voice, aiFailure }: Rec
   const [siteUrl, setSiteUrl] = useState('');
   const [isBlurring, setIsBlurring] = useState(false);
   const [voiceEnabled, setVoiceEnabled] = useState(false);
+  const [deletingStepId, setDeletingStepId] = useState<string | null>(null);
   const [, setTick] = useState(0);
   const bottomRef = useRef<HTMLDivElement>(null);
 
@@ -112,10 +114,21 @@ export default function RecordingView({ guideId, onStop, voice, aiFailure }: Rec
 
   const handleDeleteStep = useCallback(
     async (stepId: string) => {
-      await deleteStep(guideId, stepId);
-      await loadSteps();
+      if (deletingStepId) return;
+      setDeletingStepId(stepId);
+      // Optimistic update
+      setSteps((prev) => prev.filter((s) => s.step.id !== stepId));
+      try {
+        await sendMessage('deleteRecordedStep', { guideId, stepId });
+        await loadSteps();
+      } catch (err) {
+        logger.error('Failed to delete step during recording', err);
+        await loadSteps();
+      } finally {
+        setDeletingStepId(null);
+      }
     },
-    [guideId, loadSteps],
+    [deletingStepId, guideId, loadSteps],
   );
 
   const _domain = extractDomain(siteUrl);
@@ -177,10 +190,15 @@ export default function RecordingView({ guideId, onStop, voice, aiFailure }: Rec
                     </div>
                   )}
                   <div className="flex items-start justify-between gap-2">
-                    <div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-1.5 mb-1">
+                        <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-secondary text-foreground/80">
+                          {i18n.t('steps.stepLabel', [String(idx + 1)])}
+                        </span>
+                      </div>
                       {liveStep.step.aiPending ? (
                         <p className="flex items-center gap-1.5 text-[13px] font-medium leading-snug text-muted-foreground">
-                          <Loader2 size={13} className="animate-spin" />
+                          <Loader2 size={13} className="animate-spin shrink-0" />
                           {i18n.t(
                             voice.phase === 'recording' || voice.phase === 'transcribing'
                               ? 'editor.transcribingStepDescription'
@@ -188,11 +206,11 @@ export default function RecordingView({ guideId, onStop, voice, aiFailure }: Rec
                           )}
                         </p>
                       ) : (
-                        <p className="text-[13px] font-medium leading-snug text-foreground">
+                        <p className="text-[13px] font-medium leading-snug text-foreground break-words">
                           {liveStep.step.description}
                         </p>
                       )}
-                      <span className="flex items-baseline gap-1.5 text-[10px] text-purple">
+                      <span className="flex items-baseline gap-1.5 text-[10px] text-purple mt-0.5">
                         {!liveStep.step.aiPending && <StepSourceBadge source={liveStep.step.descriptionSource} />}
                         <span>
                           {timeAgo(liveStep.step.timestamp)} · {extractDomain(liveStep.step.url || siteUrl)}
@@ -202,10 +220,17 @@ export default function RecordingView({ guideId, onStop, voice, aiFailure }: Rec
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <button
+                          type="button"
+                          disabled={deletingStepId === liveStep.step.id}
                           onClick={() => handleDeleteStep(liveStep.step.id)}
-                          className="opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity motion-reduce:transition-none p-1 rounded text-border hover:text-destructive"
+                          aria-label={i18n.t('recording.deleteStep')}
+                          className="shrink-0 p-1.5 rounded-md text-muted-foreground/60 hover:text-destructive hover:bg-destructive/10 focus-visible:opacity-100 transition-colors disabled:opacity-50"
                         >
-                          <X size={13} />
+                          {deletingStepId === liveStep.step.id ? (
+                            <Loader2 size={14} className="animate-spin text-destructive" />
+                          ) : (
+                            <Trash2 size={14} />
+                          )}
                         </button>
                       </TooltipTrigger>
                       <TooltipContent align="end">{i18n.t('recording.deleteStep')}</TooltipContent>

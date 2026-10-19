@@ -120,11 +120,20 @@ export async function handleCaptureStep(data: CaptureStepData, windowId?: number
   return { stepId };
 }
 
-export async function handleUpdateInputStep(stepId: string, description: string, inputValue?: string) {
+export async function handleUpdateInputStep(
+  stepId: string,
+  description: string,
+  inputValue?: string,
+): Promise<{ updated: boolean; deleted?: boolean }> {
+  const step = await db.steps.get(stepId);
+  if (!step) {
+    return { updated: false, deleted: true };
+  }
   await updateStepDescription(stepId, description);
   if (inputValue !== undefined) {
     await db.steps.update(stepId, { inputValue });
   }
+  return { updated: true };
 }
 
 export async function handleFinalizeInputStep(
@@ -132,15 +141,21 @@ export async function handleFinalizeInputStep(
   elementMeta: ElementMeta,
   domContext: DOMContext | undefined,
   windowId?: number,
-) {
+): Promise<{ updated: boolean; deleted?: boolean }> {
+  const step = await db.steps.get(stepId);
+  if (!step) {
+    return { updated: false, deleted: true };
+  }
+
   const screenshotId = await takeScreenshot(stepId, elementMeta, windowId);
   const updates: Partial<Step> = { elementMeta };
   if (screenshotId) updates.screenshotId = screenshotId;
   if (domContext) updates.domContext = JSON.stringify(domContext);
   await db.steps.update(stepId, updates);
 
-  const guideId = (await db.steps.get(stepId))?.guideId;
+  const guideId = step.guideId;
   if (domContext && guideId) {
     queueDescription(guideId, () => tryAIDescription(stepId, domContext));
   }
+  return { updated: true };
 }

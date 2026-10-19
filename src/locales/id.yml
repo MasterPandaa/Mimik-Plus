@@ -137,6 +137,7 @@ settings:
   keyCannotSpend: "Kunci ini tidak punya kredit, jadi hanya model gratis yang bisa dipakai."
   keyUnreachable: Tidak bisa menghubungi penyedia. Periksa koneksi Anda dan coba lagi.
   modelsFound: "$1 model tersedia"
+  modelConnectFirst: "Hubungkan kunci API di atas untuk memilih model."
   smartBlur: Blur Pintar
   privacyNotice: "Kunci dan audio Anda hanya dikirim ke penyedia yang Anda pilih. Tidak ada hal lain yang meninggalkan browser Anda."
   bugReport: "Menemukan bug? Laporkan di GitHub"

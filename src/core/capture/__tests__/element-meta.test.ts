@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { extractElementMeta } from '@/core/capture/dom/element-meta';
 
 function withRect(el: HTMLElement, rect: { x: number; y: number; width: number; height: number }) {
@@ -46,5 +46,25 @@ describe('extractElementMeta', () => {
     const meta = extractElementMeta(el, { x: 12, y: 34, width: 100, height: 20 });
     expect(meta.ariaLabel).toBe('Copy link');
     expect(meta.rect).toEqual({ x: 12, y: 34, width: 100, height: 20 });
+  });
+
+  it('generates cssSelector for elements inside Shadow DOM without console warnings', () => {
+    const host = document.createElement('div');
+    host.id = 'mazda-vin-widget';
+    document.body.appendChild(host);
+    const shadow = host.attachShadow({ mode: 'open' });
+    const btn = document.createElement('button');
+    btn.className = 'download-vin-btn';
+    btn.textContent = 'Download VIN';
+    shadow.appendChild(btn);
+
+    const warnSpy = vi.spyOn(console, 'warn');
+    const meta = extractElementMeta(btn);
+
+    expect(warnSpy).not.toHaveBeenCalledWith(expect.stringContaining('shadow root inferred'), expect.anything());
+    expect(meta.cssSelector).toContain('>>>');
+    expect(meta.cssSelector).toContain('mazda-vin-widget');
+    warnSpy.mockRestore();
+    host.remove();
   });
 });

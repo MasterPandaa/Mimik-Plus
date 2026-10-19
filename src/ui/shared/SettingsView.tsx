@@ -70,6 +70,15 @@ const FOOTER_PRESETS = () => [
   i18n.t('settings.footerPresetNoDistribute'),
 ];
 
+function filterChatModels(provider: string, models: string[]): string[] {
+  if (provider === 'openai') {
+    const exclude = /^(text-embedding|tts|whisper|dall-e|canary|davinci|babbage|omni-moderation|text-moderation)/i;
+    const filtered = models.filter((m) => !exclude.test(m));
+    return filtered.length > 0 ? filtered : models;
+  }
+  return models;
+}
+
 export default function SettingsView({ onBack }: SettingsViewProps) {
   const [provider, setProvider] = useState<string>('openai');
   const [model, setModel] = useState(AI_PROVIDERS.openai.defaultModel);
@@ -105,6 +114,7 @@ export default function SettingsView({ onBack }: SettingsViewProps) {
     macAddress: false,
   });
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: initial mount only
   useEffect(() => {
     localStorage
       .get([
@@ -141,12 +151,14 @@ export default function SettingsView({ onBack }: SettingsViewProps) {
           ? customs[customProviderIdOf(p)]?.apiKey || keyFor(keys, p)
           : keyFor(keys, p);
         setApiKey(effectiveLoadedKey);
+        let loadedBaseUrl = '';
         if (
           !isCustomProviderSelection(p) &&
           isProviderKey(p) &&
           isCustomBaseUrl(AI_PROVIDERS[p], result.aiBaseUrl as string)
         ) {
-          setBaseUrl(result.aiBaseUrl as string);
+          loadedBaseUrl = result.aiBaseUrl as string;
+          setBaseUrl(loadedBaseUrl);
           setOwnServer(true);
         }
         if (result.aiLanguage) setAiLanguage(result.aiLanguage as AILanguageCode);
@@ -159,6 +171,19 @@ export default function SettingsView({ onBack }: SettingsViewProps) {
         setBrandFooter(typeof result.brandFooter === 'string' ? result.brandFooter : defaultFooterLine());
         if (result.brandAttribution === false) setBrandAttribution(false);
         setLoaded(true);
+
+        if (effectiveLoadedKey && effectiveLoadedKey.trim().length > 0) {
+          const activeCust = isCustomProviderSelection(p) ? customs[customProviderIdOf(p)] : undefined;
+          const headers = activeCust ? customProviderHeaders(activeCust) : undefined;
+          const bUrl = activeCust ? activeCust.baseUrl : loadedBaseUrl;
+          void aiKeyCheck.check(
+            p,
+            effectiveLoadedKey,
+            bUrl,
+            (result.aiModel as string) || config.defaultModel,
+            headers,
+          );
+        }
       });
   }, []);
 
@@ -238,6 +263,22 @@ export default function SettingsView({ onBack }: SettingsViewProps) {
   const usingCustomModel = customModel || isCustomModel(model, providerConfig);
   const voiceKey = resolveVoiceApiKey({ voiceProvider, voiceApiKey, aiProvider: provider, aiApiKey: apiKey });
 
+  const apiModels =
+    aiKeyCheck.models && aiKeyCheck.models.length > 0 ? filterChatModels(provider, aiKeyCheck.models) : [];
+  const availableModels = apiModels.length > 0 ? apiModels : providerConfig.models.map((m) => m.id);
+
+  useEffect(() => {
+    if (aiKeyCheck.status === 'valid' && availableModels.length > 0 && !customModel) {
+      if (!availableModels.includes(model)) {
+        if (availableModels.includes(providerConfig.defaultModel)) {
+          setModel(providerConfig.defaultModel);
+        } else {
+          setModel(availableModels[0]);
+        }
+      }
+    }
+  }, [aiKeyCheck.status, availableModels, customModel, model, providerConfig.defaultModel]);
+
   const handleLogoPick = async (file: File | undefined) => {
     if (!file) return;
     setBrandLogo(await makeBrandLogo(file));
@@ -252,13 +293,22 @@ export default function SettingsView({ onBack }: SettingsViewProps) {
     setBaseUrl('');
     if (isCustomProviderSelection(newProvider)) {
       const custom = customsMap[customProviderIdOf(newProvider)];
-      setModel(custom?.models[0]?.id ?? '');
-      setApiKey(custom?.apiKey ?? '');
+      const defaultMod = custom?.models[0]?.id ?? '';
+      setModel(defaultMod);
+      const customKey = custom?.apiKey ?? '';
+      setApiKey(customKey);
+      if (custom?.baseUrl?.trim() && defaultMod.trim()) {
+        void aiKeyCheck.check(newProvider, customKey, custom.baseUrl, defaultMod, customProviderHeaders(custom));
+      }
       return;
     }
     const builtin = isProviderKey(newProvider) ? newProvider : DEFAULT_AI_PROVIDER;
-    setApiKey(keyFor(apiKeys, builtin));
+    const existingKey = keyFor(apiKeys, builtin);
+    setApiKey(existingKey);
     setModel(AI_PROVIDERS[builtin].defaultModel);
+    if (existingKey.trim().length > 0) {
+      void aiKeyCheck.check(builtin, existingKey, '', AI_PROVIDERS[builtin].defaultModel);
+    }
   };
 
   const handleProviderSelect = (value: string) => {
@@ -311,12 +361,10 @@ export default function SettingsView({ onBack }: SettingsViewProps) {
     if (value === CUSTOM_MODEL_VALUE) {
       setCustomModel(true);
       setModel('');
-      aiKeyCheck.reset();
       return;
     }
     setCustomModel(false);
     setModel(value);
-    aiKeyCheck.reset();
   };
 
   const customEntries = Object.values(customProviders).sort((a, b) => a.id.localeCompare(b.id));
@@ -401,36 +449,6 @@ export default function SettingsView({ onBack }: SettingsViewProps) {
             <>
               <div>
                 <label className="block text-[11px] font-semibold text-foreground mb-1">
-                  {i18n.t('settings.model')}
-                </label>
-                <Select value={usingCustomModel ? CUSTOM_MODEL_VALUE : model} onValueChange={handleModelChange}>
-                  <SelectTrigger className="h-8">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {providerConfig.models.map((m) => (
-                      <SelectItem key={m.id} value={m.id}>
-                        {m.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {usingCustomModel && (
-                  <Input
-                    value={model}
-                    onChange={(e) => {
-                      setModel(e.target.value);
-                      aiKeyCheck.reset();
-                    }}
-                    placeholder={providerConfig.defaultModel}
-                    aria-label={i18n.t('settings.modelCustom')}
-                    className="mt-1.5 h-8 text-[13px] rounded-lg border-border"
-                  />
-                )}
-              </div>
-
-              <div>
-                <label className="block text-[11px] font-semibold text-foreground mb-1">
                   {i18n.t('settings.apiKey')}
                 </label>
                 <div className="flex items-center gap-1.5">
@@ -466,7 +484,6 @@ export default function SettingsView({ onBack }: SettingsViewProps) {
                 )}
                 <KeyStatusNote status={aiKeyCheck.status} />
                 <KeyWarningNote warning={aiKeyCheck.warning} />
-                {aiKeyCheck.models && <ModelList models={aiKeyCheck.models} />}
                 {keyMissing && (
                   <p
                     className="mt-1.5 flex items-start gap-1.5 text-[10px] text-destructive leading-relaxed"
@@ -556,6 +573,57 @@ export default function SettingsView({ onBack }: SettingsViewProps) {
                   )}
                 </div>
               )}
+
+              <div>
+                <label className="block text-[11px] font-semibold text-foreground mb-1">
+                  {i18n.t('settings.model')}
+                </label>
+                {aiKeyCheck.status === 'valid' ? (
+                  <>
+                    <Select value={usingCustomModel ? CUSTOM_MODEL_VALUE : model} onValueChange={handleModelChange}>
+                      <SelectTrigger className="h-8">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {availableModels.map((m) => (
+                          <SelectItem key={m} value={m}>
+                            {m}
+                          </SelectItem>
+                        ))}
+                        <SelectItem value={CUSTOM_MODEL_VALUE}>{i18n.t('settings.modelCustom')}</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    {availableModels.length > 0 && (
+                      <p className="mt-1 flex items-center gap-1 text-[10px] text-muted-foreground">
+                        <Check size={10} style={{ color: 'var(--color-success)' }} />
+                        {i18n.t('settings.modelsFound', [String(availableModels.length)])}
+                      </p>
+                    )}
+                    {usingCustomModel && (
+                      <Input
+                        value={model}
+                        onChange={(e) => setModel(e.target.value)}
+                        placeholder={providerConfig.defaultModel}
+                        aria-label={i18n.t('settings.modelCustom')}
+                        className="mt-1.5 h-8 text-[13px] rounded-lg border-border"
+                      />
+                    )}
+                  </>
+                ) : (
+                  <div className="rounded-lg border border-dashed border-border/70 p-2.5 bg-secondary/30">
+                    <p className="text-[11px] text-muted-foreground flex items-center gap-1.5">
+                      {aiKeyCheck.status === 'checking' ? (
+                        <>
+                          <Sparkles size={12} className="animate-spin text-accent" />
+                          <span>{i18n.t('settings.validatingKey')}</span>
+                        </>
+                      ) : (
+                        <span>{i18n.t('settings.modelConnectFirst')}</span>
+                      )}
+                    </p>
+                  </div>
+                )}
+              </div>
             </>
           )}
 

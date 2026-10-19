@@ -34,15 +34,33 @@ export function freezeRect(el: Element): FrozenRect {
   return { x, y, width, height };
 }
 
+/**
+ * Generates a CSS selector for an element.
+ * If the element is inside a Shadow DOM, we explicitly provide its ShadowRoot as root
+ * to prevent css-selector-generator from logging console warnings that Chrome reports
+ * as extension errors. If a shadow host is present, we chain the host and inner selectors (e.g. 'host >>> inner').
+ */
+export function generateCssSelector(el: HTMLElement): string {
+  try {
+    const rootNode = el.getRootNode?.();
+    if (typeof ShadowRoot !== 'undefined' && rootNode instanceof ShadowRoot && rootNode.host) {
+      const host = rootNode.host as HTMLElement;
+      const hostSelector = generateCssSelector(host);
+      const innerSelector = getCssSelector(el, { root: rootNode });
+      return `${hostSelector} >>> ${innerSelector}`;
+    }
+
+    const root = (rootNode as ParentNode) || document;
+    return getCssSelector(el, { root });
+  } catch {
+    return el.tagName?.toLowerCase() ?? 'unknown';
+  }
+}
+
 export function extractElementMeta(el: HTMLElement, atEvent?: FrozenRect): ElementMeta {
   const live = freezeRect(el);
   const rect = live.width > 0 || live.height > 0 ? live : (atEvent ?? live);
-  let cssSelector: string;
-  try {
-    cssSelector = getCssSelector(el);
-  } catch {
-    cssSelector = el.tagName?.toLowerCase() ?? 'unknown';
-  }
+  const cssSelector = generateCssSelector(el);
   return {
     tag: el.tagName?.toLowerCase() ?? 'unknown',
     cssSelector,

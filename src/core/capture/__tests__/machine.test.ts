@@ -116,4 +116,44 @@ describe('captureMachine', () => {
 
     expect(firstId).not.toBe(secondId);
   });
+
+  it('decrements stepCount on STEP_DELETED without count while RECORDING', () => {
+    const actor = startActor();
+    actor.send({ type: 'START_RECORDING' });
+    actor.send({ type: 'USER_ACTION' });
+    actor.send({ type: 'USER_ACTION' });
+    actor.send({ type: 'USER_ACTION' });
+    expect(actor.getSnapshot().context.stepCount).toBe(3);
+
+    actor.send({ type: 'STEP_DELETED' });
+    expect(actor.getSnapshot().context.stepCount).toBe(2);
+
+    actor.send({ type: 'STEP_DELETED' });
+    expect(actor.getSnapshot().context.stepCount).toBe(1);
+
+    actor.send({ type: 'STEP_DELETED' });
+    expect(actor.getSnapshot().context.stepCount).toBe(0);
+
+    // Clamps to 0
+    actor.send({ type: 'STEP_DELETED' });
+    expect(actor.getSnapshot().context.stepCount).toBe(0);
+  });
+
+  it('updates stepCount to explicit count on STEP_DELETED with count while RECORDING', () => {
+    const actor = startActor();
+    actor.send({ type: 'START_RECORDING' });
+    actor.send({ type: 'USER_ACTION' });
+    actor.send({ type: 'USER_ACTION' });
+    actor.send({ type: 'USER_ACTION' });
+    expect(actor.getSnapshot().context.stepCount).toBe(3);
+
+    actor.send({ type: 'STEP_DELETED', count: 1 });
+    expect(actor.getSnapshot().context.stepCount).toBe(1);
+  });
+
+  it('ignores STEP_DELETED in IDLE state', () => {
+    const actor = startActor();
+    actor.send({ type: 'STEP_DELETED' });
+    expect(actor.getSnapshot().context.stepCount).toBe(0);
+  });
 });

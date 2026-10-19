@@ -42,6 +42,7 @@ export interface UpdateInputStepData {
 
 export interface UpdateInputStepResponse {
   updated: boolean;
+  deleted?: boolean;
 }
 
 export interface FinalizeInputStepData {
@@ -52,6 +53,7 @@ export interface FinalizeInputStepData {
 
 export interface FinalizeInputStepResponse {
   updated: boolean;
+  deleted?: boolean;
 }
 
 export interface StartGuideMeData {
@@ -144,11 +146,22 @@ export interface ExitBlurModeResponse {
   exited: boolean;
 }
 
+export interface DeleteRecordedStepData {
+  guideId: string;
+  stepId: string;
+}
+
+export interface DeleteRecordedStepResponse {
+  deleted: boolean;
+  remainingCount: number;
+}
+
 interface MimikProtocol {
   getState(): GetStateResponse;
   startRecording(data: StartRecordingData): StartRecordingResponse;
   stopRecording(): StopRecordingResponse;
   captureStep(data: CaptureStepData): CaptureStepResponse;
+  deleteRecordedStep(data: DeleteRecordedStepData): DeleteRecordedStepResponse;
   updateInputStep(data: UpdateInputStepData): UpdateInputStepResponse;
   finalizeInputStep(data: FinalizeInputStepData): FinalizeInputStepResponse;
   startGuideMe(data: StartGuideMeData): StartGuideMeResponse;

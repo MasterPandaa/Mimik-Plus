@@ -137,6 +137,7 @@ settings:
   keyCannotSpend: "This key has no credits, so only free models will work."
   keyUnreachable: Could not reach the provider. Check your connection and try again.
   modelsFound: "$1 models available"
+  modelConnectFirst: "Connect your API key above to choose a model."
   smartBlur: Smart Blur
   privacyNotice: "Your keys and audio go only to the provider you pick. Nothing else leaves your browser."
   bugReport: "Found a bug? Report it on GitHub"

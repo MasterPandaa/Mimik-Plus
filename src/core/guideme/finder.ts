@@ -58,9 +58,26 @@ function getCandidateValue(el: HTMLElement, signal: string): string | null {
   }
 }
 
+function querySelectorDeep(selector: string): Element | null {
+  if (selector.includes(' >>> ')) {
+    const parts = selector.split(' >>> ');
+    let currentRoot: ParentNode = document;
+    let currentEl: Element | null = null;
+    for (const part of parts) {
+      currentEl = currentRoot.querySelector(part);
+      if (!currentEl) return null;
+      if (currentEl.shadowRoot) {
+        currentRoot = currentEl.shadowRoot;
+      }
+    }
+    return currentEl;
+  }
+  return document.querySelector(selector);
+}
+
 function scoreCssSelector(meta: ElementMeta, candidate: HTMLElement): number {
   try {
-    const matched = document.querySelector(meta.cssSelector);
+    const matched = querySelectorDeep(meta.cssSelector);
     return matched === candidate ? 1 : 0;
   } catch {
     return 0;

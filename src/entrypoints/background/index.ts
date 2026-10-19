@@ -4,9 +4,11 @@ import { validateApiKey } from '@/core/capture/ai/validate';
 import { stepRequiresManual } from '@/core/guideme/manual';
 import { advanceSession, cancelSession, completeSession, getSession, startSession } from '@/core/guideme/session';
 import { actionSteps } from '@/core/guides/blocks';
+import { db } from '@/core/guides/db';
 import {
   createGuide,
   createSnapshot,
+  deleteStep,
   getScreenshotsForSteps,
   getStepsForGuide,
   mergeGuideInto,
@@ -210,16 +212,23 @@ export default defineBackground(() => {
     return handleCaptureStep(data, sender.tab?.windowId);
   });
 
+  onMessage('deleteRecordedStep', async ({ data }) => {
+    await waitUntilReady();
+    await deleteStep(data.guideId, data.stepId);
+    const remainingCount = await db.steps.where('guideId').equals(data.guideId).count();
+    const actor = getActor();
+    actor.send({ type: 'STEP_DELETED', count: remainingCount });
+    return { deleted: true, remainingCount };
+  });
+
   onMessage('updateInputStep', async ({ data }) => {
     await waitUntilReady();
-    await handleUpdateInputStep(data.stepId, data.description, data.inputValue);
-    return { updated: true };
+    return handleUpdateInputStep(data.stepId, data.description, data.inputValue);
   });
 
   onMessage('finalizeInputStep', async ({ data, sender }) => {
     await waitUntilReady();
-    await handleFinalizeInputStep(data.stepId, data.elementMeta, data.domContext, sender.tab?.windowId);
-    return { updated: true };
+    return handleFinalizeInputStep(data.stepId, data.elementMeta, data.domContext, sender.tab?.windowId);
   });
 
   onMessage('startGuideMe', async ({ data }) => {

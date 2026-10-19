@@ -40,16 +40,26 @@ export class InputSession {
     const label = getFieldLabel(target);
     if (isSensitiveField(target) || isRedactedField(target)) {
       const description = isSensitiveField(target) ? i18n.t('steps.typeSecret') : i18n.t('steps.typeInto', [label]);
-      sendMessage('updateInputStep', { stepId: this.stepId, description }).catch((err) =>
-        logger.warn('Failed to update input step', err),
-      );
+      sendMessage('updateInputStep', { stepId: this.stepId, description })
+        .then((res) => {
+          if (res?.deleted) {
+            this.stepId = null;
+            this.target = null;
+          }
+        })
+        .catch((err) => logger.warn('Failed to update input step', err));
       return;
     }
     const val = getFieldValue(target);
     const desc = val ? `Type "${val}" in ${label}` : `Clear ${label}`;
-    sendMessage('updateInputStep', { stepId: this.stepId, description: desc, inputValue: val || undefined }).catch(
-      (err) => logger.warn('Failed to update input step', err),
-    );
+    sendMessage('updateInputStep', { stepId: this.stepId, description: desc, inputValue: val || undefined })
+      .then((res) => {
+        if (res?.deleted) {
+          this.stepId = null;
+          this.target = null;
+        }
+      })
+      .catch((err) => logger.warn('Failed to update input step', err));
   }
 
   async finalize() {

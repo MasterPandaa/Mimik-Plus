@@ -100,12 +100,21 @@ function getContainerLabel(el: Element): string | null {
   );
 }
 
+function parentOrHost(el: Element): Element | null {
+  if (el.parentElement) return el.parentElement;
+  const root = el.getRootNode?.();
+  if (typeof ShadowRoot !== 'undefined' && root instanceof ShadowRoot && root.host) {
+    return root.host;
+  }
+  return null;
+}
+
 function findContainer(el: Element): { tag: string; role: string | null; label: string | null } | null {
-  let current = el.parentElement;
+  let current: Element | null = parentOrHost(el);
   for (
     let depth = 0;
     current && current !== document.body && depth < MAX_WALK_UP;
-    depth++, current = current.parentElement
+    depth++, current = parentOrHost(current)
   ) {
     const tag = current.tagName.toLowerCase();
     const role = attr(current, 'role');
@@ -117,16 +126,20 @@ function findContainer(el: Element): { tag: string; role: string | null; label: 
 }
 
 function findNearestHeading(el: Element): string | null {
-  let current = el.parentElement;
-  for (let depth = 0; current && current !== document.body && depth < 5; depth++, current = current.parentElement) {
+  let current: Element | null = parentOrHost(el);
+  for (let depth = 0; current && current !== document.body && depth < 5; depth++, current = parentOrHost(current)) {
     const text = textOf(current.querySelector('h1, h2, h3, h4, h5, h6, [role="heading"]'));
     if (text) return text.slice(0, 100);
   }
 
   let closest: Element | null = null;
-  for (const h of document.querySelectorAll('h1, h2, h3, h4, h5, h6, [role="heading"]')) {
-    if (el.compareDocumentPosition(h) & Node.DOCUMENT_POSITION_PRECEDING) closest = h;
-    else break;
+  try {
+    for (const h of document.querySelectorAll('h1, h2, h3, h4, h5, h6, [role="heading"]')) {
+      if (el.compareDocumentPosition(h) & Node.DOCUMENT_POSITION_PRECEDING) closest = h;
+      else break;
+    }
+  } catch {
+    // ignore
   }
   return closest ? (textOf(closest)?.slice(0, 100) ?? null) : null;
 }
