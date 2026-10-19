@@ -39,6 +39,8 @@ Klik rekam, lakukan aktivitasmu, dapatkan panduan rapi dengan tangkapan layar be
   - [🔒 Smart Blur](#-smart-blur)
   - [🧠 Deskripsi AI (opsional)](#-deskripsi-ai-opsional)
   - [🔌 Penyedia AI Kustom (baru!)](#-penyedia-ai-kustom-baru)
+  - [🗑️ Hapus Langkah Langsung (v1.3.1)](#️-hapus-langkah-langsung-v131)
+  - [🔄 Pemilihan Model Dinamis (v1.3.0)](#-pemilihan-model-dinamis-v130)
   - [▶️ Pemutaran Guide Me](#️-pemutaran-guide-me)
   - [🎙️ Narasi suara (opsional)](#️-narasi-suara-opsional)
   - [✏️ Editor panduan](#️-editor-panduan)
@@ -214,6 +216,28 @@ Selain OpenAI, Anthropic, dan Google Gemini, kini kamu bisa menghubungkan **API 
 
 [![Back to top][back-to-top]](#readme-top)
 
+### 🗑️ Hapus Langkah Langsung (v1.3.1)
+
+Salah klik tombol atau tidak sengaja membuka tab saat sedang merekam? Kamu tidak perlu mengulang rekaman dari awal atau menunggu selesai merekam. Hapus langkah yang salah secara langsung dari daftar rekaman di panel samping (*side panel*).
+
+Mimik secara instan memperbarui antarmuka pengguna secara optimistik, menghapus data tangkapan layar dari IndexedDB, menyusun ulang indeks langkah yang tersisa, dan memastikan daftar rekaman tetap sinkron tanpa flicker.
+
+<div align="right">
+
+[![Back to top][back-to-top]](#readme-top)
+
+</div>
+
+### 🔄 Pemilihan Model Dinamis (v1.3.0)
+
+Menu dropdown model AI kini secara dinamis mengambil dan menampilkan model yang tersedia langsung dari endpoint `/models` penyedia hanya setelah kunci API berhasil diuji dan diverifikasi.
+
+Fitur ini mencegah kesalahan pemilihan model yang tidak didukung akun, mendukung endpoint lokal kustom (Ollama, LM Studio, vLLM) dengan model yang terpasang, serta menjaga tata letak pengaturan tetap intuitif dan ringkas.
+
+<div align="right">
+
+[![Back to top][back-to-top]](#readme-top)
+
 </div>
 
 ### ▶️ Pemutaran Guide Me
@@ -275,16 +299,21 @@ Semua ekspor dibuat di sisi klien. Tidak ada yang melalui server.
 
 </div>
 
-## 🆕 Yang Baru di Fork Ini
+## 🆕 Yang Baru di Fork Ini (v1.3.1)
 
-Fork ini dibangun di atas Mimik v1.2.0 dengan penambahan berikut:
+Fork ini dibangun di atas Mimik dengan peningkatan modern berikut:
 
 | Fitur | Deskripsi |
 |-------|-----------|
+| 🗑️ **Hapus Langkah Langsung (v1.3.1)** | Hapus langkah yang salah secara instan di panel samping saat perekaman masih aktif. UI optimistik cepat dengan pelacakan client-side untuk mencegah flicker dan penomoran otomatis. |
+| 🔄 **Pemilihan Model Dinamis (v1.3.0)** | Menu dropdown model memuat model yang tersedia secara dinamis langsung dari penyedia setelah verifikasi kunci API. |
+| 🇮🇩 **Optimasi Caption AI Indonesia** | Panduan prompt natural dan penegasan nada imperatif untuk memastikan deskripsi langkah berbahasa Indonesia tetap berkualitas tinggi di model murah/gratis. |
+| 🔴 **Dukungan Opera & Opera GX MV3** | Target build dan paket distribusi resmi Manifest V3 untuk Opera (`npm run build:opera`, `npm run zip:opera`). |
+| 🛡️ **Penembusan Shadow DOM** | Pembuatan selektor elemen bertingkat (`host >>> inner`) untuk portal web perusahaan kompleks (seperti sistem Mazda). |
 | 🔌 **Penyedia AI Kustom** | Hubungkan API apa pun yang kompatibel dengan OpenAI — Ollama, LM Studio, vLLM, atau gateway pihak ketiga. Atur URL dasar, daftar model, kunci API, dan header kustom. |
 | 🌐 **Bahasa Indonesia** | Terjemahan UI lengkap dalam Bahasa Indonesia. Semua panel, dialog, pesan error, dan label ekspor sudah dilokalkan. |
 | 🏷️ **Label Sumber Langkah** | Setiap kartu langkah kini menampilkan asal deskripsinya: AI, Suara, Dasar (berbasis aturan), atau Diedit. |
-| ✅ **Validasi Kunci API Lebih Baik** | Umpan balik lebih detail saat memeriksa kunci API — menampilkan daftar model yang tersedia, peringatan kredit, dan error konektivitas. |
+| ✅ **Validasi Kunci API Lebih Baik** | Umpan balik real-time dengan daftar model yang tersedia, peringatan kredit, dan error konektivitas. |
 | 🔐 **Validasi Penyimpanan Lebih Ketat** | Setiap baca/tulis ke IndexedDB divalidasi terhadap bentuk yang dideklarasikan, mencegah kerusakan data yang tidak terdeteksi. |
 
 <div align="right">

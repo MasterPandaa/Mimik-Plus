@@ -39,6 +39,8 @@ Click record, do the thing, get a polished guide with annotated screenshots. Nar
   - [🔒 Smart Blur](#-smart-blur)
   - [🧠 AI descriptions (optional)](#-ai-descriptions-optional)
   - [🔌 Custom AI Providers (new!)](#-custom-ai-providers-new)
+  - [🗑️ Live Step Deletion (v1.3.1)](#️-live-step-deletion-v131)
+  - [🔄 Dynamic Model Selection (v1.3.0)](#-dynamic-model-selection-v130)
   - [▶️ Guide Me replay](#️-guide-me-replay)
   - [🎙️ Voice narration (optional)](#️-voice-narration-optional)
   - [✏️ Guide editor](#️-guide-editor)
@@ -215,6 +217,28 @@ Beyond OpenAI, Anthropic, and Google Gemini, you can now connect **any OpenAI-co
 
 [![Back to top][back-to-top]](#readme-top)
 
+### 🗑️ Live Step Deletion (v1.3.1)
+
+Accidentally clicked the wrong button or opened an unwanted tab while recording? You don't have to restart or wait until recording finishes. Delete mistaken steps directly from the live recording feed in the side panel.
+
+Mimik immediately updates the UI optimistically, removes the screenshot and step data from IndexedDB, re-indexes remaining steps, and ensures the feed stays in sync without flickering.
+
+<div align="right">
+
+[![Back to top][back-to-top]](#readme-top)
+
+</div>
+
+### 🔄 Dynamic Model Selection (v1.3.0)
+
+The AI model selection dropdown dynamically fetches and displays available models directly from the provider's `/models` endpoint only after your API key is tested and verified.
+
+This prevents invalid model selections, supports custom self-hosted endpoints (Ollama, LM Studio, vLLM) with their installed models, and keeps the settings interface intuitive and streamlined.
+
+<div align="right">
+
+[![Back to top][back-to-top]](#readme-top)
+
 </div>
 
 ### ▶️ Guide Me replay
@@ -295,16 +319,21 @@ Mimik Plus now includes full support for **Bahasa Indonesia**. The entire interf
 
 </div>
 
-## 🆕 What's New in This Fork
+## 🆕 What's New in This Fork (v1.3.1)
 
-This fork builds on top of Mimik v1.2.0 with the following additions:
+This fork builds on top of Mimik with the following modern additions:
 
 | Feature | Description |
 |---------|-------------|
-| 🔌 **Custom AI Providers** | Connect any OpenAI-compatible API — Ollama, LM Studio, vLLM, or any third-party gateway. Set a base URL, model list, API key, and custom headers. |
+| 🗑️ **Live Step Deletion (v1.3.1)** | Delete mistaken steps on-the-fly directly in the side panel during active recording. Instant optimistic UI with persistent client-side tracking to prevent flickering and automatic step renumbering. |
+| 🔄 **Dynamic Model Selection (v1.3.0)** | Model selector dynamically loads available models directly from your provider upon API key verification. |
+| 🇮🇩 **Optimized Indonesian AI Captions** | Enhanced prompt guidelines and imperative tone enforcement to ensure natural, concise descriptions in Bahasa Indonesia even on budget/free models. |
+| 🔴 **Opera & Opera GX MV3 Support** | Dedicated Manifest V3 build targets and distribution packaging (`npm run build:opera`, `npm run zip:opera`). |
+| 🛡️ **Shadow DOM Piercing** | Deep element selector generation (`host >>> inner`) resolving capture issues on complex enterprise web portals (e.g. Mazda systems). |
+| 🔌 **Custom AI Providers** | Connect any OpenAI-compatible API — Ollama, LM Studio, vLLM, or third-party gateways. Set custom base URL, model list, API key, and request headers. |
 | 🌐 **Bahasa Indonesia** | Full UI translation for Indonesian language. All panels, dialogs, error messages, and export labels are localized. |
 | 🏷️ **Step Source Labels** | Each step card now shows where its description came from: AI, Voice, Basic (rule-based), or Edited. |
-| ✅ **Improved API Key Validation** | Better feedback when checking API keys — shows available model lists, spending warnings, and connectivity errors. |
+| ✅ **Improved API Key Validation** | Real-time verification with available model lists, spending warnings, and connectivity errors. |
 | 🔐 **Stricter Storage Validation** | Every read/write to IndexedDB is validated against the declared shape, preventing silent data corruption. |
 
 <div align="right">
