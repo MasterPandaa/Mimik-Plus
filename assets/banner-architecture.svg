@@ -1,0 +1,131 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 280" width="960" height="280">
+  <defs>
+    <!-- Background Grid Pattern -->
+    <pattern id="grid-Mimik-Plus" width="24" height="24" patternUnits="userSpaceOnUse">
+      <circle cx="12" cy="12" r="1" fill="#FFFFFF" fill-opacity="0.04"/>
+    </pattern>
+    
+    <!-- Ambient Radial Accent Glow -->
+    <radialGradient id="glow-Mimik-Plus" cx="80%" cy="50%" r="55%">
+      <stop offset="0%" stop-color="#4F46E5" stop-opacity="0.20"/>
+      <stop offset="60%" stop-color="#312E81" stop-opacity="0.05"/>
+      <stop offset="100%" stop-color="#0A0A0F" stop-opacity="0"/>
+    </radialGradient>
+    
+    <!-- Linear Gradient for Canvas -->
+    <linearGradient id="bg-grad-Mimik-Plus" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#12121A"/>
+      <stop offset="100%" stop-color="#09090D"/>
+    </linearGradient>
+  </defs>
+
+  <!-- 1. Canvas Base & Grid -->
+  <rect width="960" height="280" rx="12" fill="url(#bg-grad-Mimik-Plus)"/>
+  <rect width="960" height="280" rx="12" fill="url(#grid-Mimik-Plus)"/>
+  <rect width="960" height="280" rx="12" fill="url(#glow-Mimik-Plus)"/>
+
+  <!-- 2. Architectural Borders -->
+  <rect x="0.75" y="0.75" width="958.5" height="278.5" rx="11.25" fill="none" stroke="#222232" stroke-width="1.5"/>
+  <!-- Top Accent Highlight -->
+  <line x1="48" y1="1" x2="280" y2="1" stroke="#6366F1" stroke-width="2.5" stroke-linecap="round"/>
+
+  <!-- 3. Left Column Content -->
+  <!-- Category Badge -->
+  <g transform="translate(48, 38)">
+    <rect width="203.5" height="22" rx="4" fill="#312E81" fill-opacity="0.35" stroke="#6366F1" stroke-width="1.2"/>
+    <circle cx="12" cy="11" r="3" fill="#6366F1"/>
+    <text x="22" y="14.5" fill="#A5B4FC" font-family="'SF Mono', Consolas, monospace" font-size="9.5" font-weight="700" letter-spacing="1.2">BROWSER WORKFLOW AUTOMATION</text>
+  </g>
+
+  <!-- Title -->
+  <text x="48" y="98" fill="#F8FAFC" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="29" font-weight="800" letter-spacing="-0.5">Mimik Plus</text>
+
+  <!-- Subtitle / Tagline -->
+  <text x="48" y="128" fill="#94A3B8" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="13" font-weight="400">Local-First Workflow Auto-Capture &amp; Multimodal Guide Generator</text>
+
+  <!-- Tech Stack Badges -->
+  
+        <g transform="translate(48, 158)">
+          <rect width="90.0" height="24" rx="4" fill="#14141F" stroke="#26263A" stroke-width="1"/>
+          <text x="45.0" y="16" fill="#CBD5E1" font-family="'SF Mono', Consolas, monospace" font-size="10.5" font-weight="500" text-anchor="middle">TypeScript</text>
+        </g>
+        
+        <g transform="translate(146.0, 158)">
+          <rect width="97.2" height="24" rx="4" fill="#14141F" stroke="#26263A" stroke-width="1"/>
+          <text x="48.6" y="16" fill="#CBD5E1" font-family="'SF Mono', Consolas, monospace" font-size="10.5" font-weight="500" text-anchor="middle">Manifest V3</text>
+        </g>
+        
+        <g transform="translate(251.2, 158)">
+          <rect width="82.8" height="24" rx="4" fill="#14141F" stroke="#26263A" stroke-width="1"/>
+          <text x="41.4" y="16" fill="#CBD5E1" font-family="'SF Mono', Consolas, monospace" font-size="10.5" font-weight="500" text-anchor="middle">IndexedDB</text>
+        </g>
+        
+        <g transform="translate(342.0, 158)">
+          <rect width="82.8" height="24" rx="4" fill="#14141F" stroke="#26263A" stroke-width="1"/>
+          <text x="41.4" y="16" fill="#CBD5E1" font-family="'SF Mono', Consolas, monospace" font-size="10.5" font-weight="500" text-anchor="middle">Custom AI</text>
+        </g>
+        
+        <g transform="translate(432.8, 158)">
+          <rect width="55.0" height="24" rx="4" fill="#14141F" stroke="#26263A" stroke-width="1"/>
+          <text x="27.5" y="16" fill="#CBD5E1" font-family="'SF Mono', Consolas, monospace" font-size="10.5" font-weight="500" text-anchor="middle">Vite</text>
+        </g>
+        
+
+  <!-- Footer Metadata & GitHub Repository Info -->
+  <g transform="translate(48, 226)">
+    <!-- GitHub Octocat Icon -->
+    <path d="M 8 0 C 3.58 0 0 3.58 0 8 C 0 11.54 2.29 14.53 5.47 15.59 C 5.87 15.66 6.02 15.42 6.02 15.21 C 6.02 15.02 6.01 14.39 6.01 13.72 C 4 14.09 3.48 13.23 3.32 12.78 C 3.23 12.55 2.84 11.84 2.5 11.65 C 2.22 11.5 1.82 11.13 2.49 11.12 C 3.12 11.11 3.57 11.7 3.72 11.94 C 4.44 13.15 5.59 12.81 6.05 12.6 C 6.12 12.08 6.33 11.73 6.56 11.53 C 4.78 11.33 2.92 10.64 2.92 7.58 C 2.92 6.71 3.23 5.99 3.74 5.43 C 3.66 5.23 3.38 4.41 3.82 3.31 C 3.82 3.31 4.49 3.1 6.02 4.13 C 6.66 3.95 7.34 3.86 8.02 3.86 C 8.7 3.86 9.38 3.95 10.02 4.13 C 11.55 3.09 12.22 3.31 12.22 3.31 C 12.66 4.41 12.38 5.23 12.3 5.43 C 12.81 5.99 13.12 6.7 13.12 7.58 C 13.12 10.65 11.25 11.33 9.47 11.53 C 9.76 11.78 10.01 12.26 10.01 13.01 C 10.01 14.08 10 14.94 10 15.21 C 10 15.42 10.15 15.67 10.55 15.59 C 13.71 14.53 16 11.53 16 8 C 16 3.58 12.42 0 8 0 Z" fill="#64748B"/>
+    <text x="24" y="12.5" fill="#64748B" font-family="'SF Mono', Consolas, monospace" font-size="12" font-weight="500">MasterPandaa / Mimik-Plus</text>
+    
+    <!-- Status Pill -->
+    <rect x="235" y="-1" width="62" height="18" rx="3" fill="#12121C" stroke="#252538" stroke-width="1"/>
+    <circle cx="243" cy="8" r="2.5" fill="#10B981"/>
+    <text x="250" y="11.5" fill="#94A3B8" font-family="'SF Mono', Consolas, monospace" font-size="9" font-weight="600">ACTIVE</text>
+  </g>
+
+  <!-- 4. Right Column Geometric Vector Motif -->
+  
+    <g transform="translate(670, 35)">
+      <rect x="20" y="25" width="200" height="150" rx="8" fill="#12121A" stroke="#252538" stroke-width="1.5"/>
+
+      <!-- Window Titlebar -->
+      <path d="M 20 33 Q 20 25 28 25 L 212 25 Q 220 25 220 33 L 220 48 L 20 48 Z" fill="#181824"/>
+      <circle cx="34" cy="36" r="3.5" fill="#EF4444"/>
+      <circle cx="45" cy="36" r="3.5" fill="#F59E0B"/>
+      <circle cx="56" cy="36" r="3.5" fill="#10B981"/>
+
+      <!-- Address Bar -->
+      <rect x="70" y="30" width="100" height="12" rx="3" fill="#0D0D14" stroke="#2D2D42" stroke-width="1"/>
+      <text x="76" y="39" fill="#94A3B8" font-family="'SF Mono', Consolas, monospace" font-size="7">https://mimik.dev</text>
+
+      <!-- REC Live Indicator -->
+      <circle cx="195" cy="36" r="3" fill="#EF4444"/>
+      <text x="202" y="39" fill="#EF4444" font-family="'SF Mono', Consolas, monospace" font-size="8" font-weight="700">REC</text>
+
+      <!-- Workflow Step Timeline inside window -->
+      <line x1="45" y1="85" x2="195" y2="85" stroke="#2D2D42" stroke-width="2"/>
+
+      <!-- Step 1 -->
+      <rect x="35" y="65" width="38" height="40" rx="5" fill="#0D0D14" stroke="#6366F1" stroke-width="1.5"/>
+      <text x="54" y="80" fill="#A5B4FC" font-family="'SF Mono', Consolas, monospace" font-size="8" font-weight="700" text-anchor="middle">#01</text>
+      <text x="54" y="95" fill="#94A3B8" font-family="'SF Mono', Consolas, monospace" font-size="7" text-anchor="middle">NAV</text>
+
+      <!-- Step 2 (Active Target) -->
+      <rect x="100" y="60" width="44" height="48" rx="6" fill="#181826" stroke="#6366F1" stroke-width="2.5"/>
+      <text x="122" y="78" fill="#FFFFFF" font-family="'SF Mono', Consolas, monospace" font-size="9" font-weight="700" text-anchor="middle">#02</text>
+      <text x="122" y="94" fill="#A5B4FC" font-family="'SF Mono', Consolas, monospace" font-size="8" font-weight="600" text-anchor="middle">CLICK</text>
+
+      <!-- Step 3 -->
+      <rect x="165" y="65" width="38" height="40" rx="5" fill="#0D0D14" stroke="#333348" stroke-width="1.5"/>
+      <text x="184" y="80" fill="#64748B" font-family="'SF Mono', Consolas, monospace" font-size="8" font-weight="700" text-anchor="middle">#03</text>
+      <text x="184" y="95" fill="#64748B" font-family="'SF Mono', Consolas, monospace" font-size="7" text-anchor="middle">GUIDE</text>
+
+      <!-- Precision Cursor Arrow clicking on Step 2 -->
+      <path d="M 132 98 L 146 126 L 140 128 L 134 140 L 126 136 L 132 124 L 124 122 Z" fill="#A5B4FC" stroke="#FFFFFF" stroke-width="1.5"/>
+
+      <!-- Guide Auto-Generated Badge -->
+      <rect x="60" y="190" width="115" height="18" rx="4" fill="#0D0D14" stroke="#6366F1" stroke-width="1"/>
+      <text x="117" y="202" fill="#A5B4FC" font-family="'SF Mono', Consolas, monospace" font-size="8.5" font-weight="600" text-anchor="middle">LOCAL MV3 CAPTURE</text>
+    </g>
+    
+</svg>
