@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/MasterPandaa/MasterPandaa/main/assets/banners/Mimik-Plus.svg" alt="Mimik Plus Banner" width="100%">
+  <img src="assets/banner.svg" alt="Mimik Plus Banner" width="100%">
 </p>
 
 <p align="center">
